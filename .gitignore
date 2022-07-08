@@ -3,30 +3,36 @@
 .RData
 .Ruserdata
 
-*.asc
-*.asci
-*.ascii
-*.tif
-*.tiff
-*.prj
-*.jpeg
-*.JPEG
-*.jpg
-*.JPG
-*.png
-*.PNG
+# *.asc
+# *.asci
+# *.ascii
+# *.tif
+# *.tiff
+# *.prj
+# *.jpeg
+# *.JPEG
+# *.jpg
+# *.JPG
+# *.png
+# *.PNG
 *.csv
-*.xls
-*.xlsx
-*.gri
-*.grd
-*.out
-*.Phillips
-*.txt
-*.html
-*.lambdas
-*.dbf
-*.sbn
-*.sbx
-*.shp
-*.shx
+# *.xls
+# *.xlsx
+# *.gri
+# *.grd
+# *.out
+# *.Phillips
+# *.txt
+# *.html
+# *.lambdas
+# *.dbf
+# *.sbn
+# *.sbx
+# *.shp
+# *.shx
+
+virtual species/
+datasets/
+biasLayers/
+SDMnormal/
+SDMimproved/

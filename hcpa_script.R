@@ -1,8 +1,11 @@
-## Este script contem algoritmos para gerar 'n' sps artificiais aleatoriamente (Parte 1), modelar ausencias (Parte 2), modelar distribuicao com pseudoausencias melhoradas (Parte 3) e analise dos resultados atraves de graficos simples (Parte 4)
-## Anderson A. Eduardo, outubro/2014
+## Este script contem algoritmos para gerar 'n' sps artificiais aleatoriamente 
+## (Parte 1), modelar ausencias (Parte 2), modelar distribuicao com pseudoausencias 
+## melhoradas (Parte 3) e analise dos resultados atraves de graficos simples (Parte 4)
+
+## Anderson A. Eduardo, outubro/2017 ##
 
 
-##abrindo pacotes necessarios
+### abrindo pacotes necessarios ###
 #Sys.setenv(JAVA_HOME = "/usr/lib/jvm/java-7-openjdk-amd64")
 #options(java.parameters = "Xmx7g")
 #library(rJava)
@@ -11,257 +14,374 @@ library(biomod2)
 library(dismo)
 library(usdm)
 
-##definindo prametros e variaveis globais (NOTEBOOK)
-projectFolder = "/home/anderson/Projetos/HCPA" #pasta do projeto
-envVarFolder = "/home/anderson/gridfiles/dados_projeto" #pasta com as variaveis ambientais
-envVarPaths = list.files(path=envVarFolder, full.names=TRUE) #lista com os caminhos das camadas no sistema (comp.)
-AmSulShape = rgdal::readOGR("/home/anderson/shapefiles/Am_Sul/borders.shp") #shape da America do Sul
-maxentFolder = '/home/anderson/R/x86_64-pc-linux-gnu-library/3.6/dismo/java/maxent.jar' #pasta para resultados do maxent
-## spsTypes = c('spHW', 'spHD', 'spCD') #nomes das especies
-## sdmTypes = c('normal','optimized')
-sampleSizes = c(10,20,40,80,160)
-NumRep = 10 #numero de replicas (de cada cenario amostral)
-vies_levels = 5 #niveis de vies espacial/geografico na amostragem dos pontos (1 = maior vies / 5 = sem vies algum)
-Nsp = NumRep #numero de especies a serem criadas e trabalhadas igual ao numero de replicas
-SDMreplicates = 10 #numero de replicas para calibracao/validacao dos SDMs
-statResultsSDMnormal = data.frame() #tabela de estatisticas basicas do modelo
-statResultsSDMimproved = data.frame()
-
-## ##definindo prametros e variaveis globais (LORIEN)
-## projectFolder = "J:/Pesquisadorxs/Anderson_Eduardo/high_quality_PA" #pasta do projeto
-## envVarFolder = "J:/Pesquisadorxs/Anderson_Eduardo/dados_projeto/000" #pasta com as variaveis ambientais
-## envVarPaths = list.files(path=envVarFolder, pattern='.asc', full.names=TRUE) #lista com os caminhos das camadas no sistema (comp.)
-## AmSulShape = rgdal::readOGR("J:/Pesquisadorxs/Anderson_Eduardo/shapefiles/Am_Sul/borders.shp") #shape da America do Sul
-## maxentFolder = 'C:/Users/WS/Documents/R/win-library/3.4/dismo/java/maxent.jar' #pasta para resultados do maxent
-## ## spsTypes = c('spHW', 'spHD', 'spCD') #nomes das especies
-## ## sdmTypes = c('normal','optimized')
-## sampleSizes = c(10,20,40,80,160)
-## NumRep = 10 #numero de replicas (de cada cenario amostral)
-## vies_levels = 5
-## ##variaveis preditoras
-## elevation = raster('J:/Pesquisadorxs/Anderson_Eduardo/DEM/DEM.tif')
-## predictors = stack(envVarPaths,elevation) #predictors com todas as variaveis (presente)
-## predictors = predictors[[c('bioclim_01','bioclim_12')]]
-## predictors = stack(mask(x=predictors, mask=AmSulShape))
-## crs(predictors) = CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0') #ajustando CRS
-## Nsp = NumRep #numero de especies a serem criadas e trabalhadas igual ao numero de replicas
-## SDMreplicates = 10 #numero de replicas para calibracao/validacao dos SDMs
-## statResultsSDMnormal = data.frame() #tabela de estatisticas basicas do modelo
-## statResultsSDMimproved = data.frame()
-
-# ##definindo prametros e variaveis globais (Yavanna)
-# projectFolder = "D:/Anderson_Eduardo/SDM com pseudoausencias melhoradas" #pasta do projeto
-# envVarFolder = "D:/Anderson_Eduardo/gridfiles/variaveis ambientais AmSul 120kyr/000" #pasta com as variaveis ambientais
-# envVarPaths = list.files(path=envVarFolder, pattern='.asc', full.names=TRUE) #lista com os caminhos das camadas no sistema (comp.)
-# AmSulShape = rgdal::readOGR("D:/Anderson_Eduardo/shapefiles/Am_Sul/borders.shp") #shape da America do Sul
-# maxentFolder = 'D:/Anderson_Eduardo/maxent/maxent.jar' #pasta para resultados do maxent
-# sampleSizes = c(20,40,80,160)
-# NumRep = 10 #numero de replicas (de cada cenario amostral)
-# vies_levels = 5
-# ##variaveis preditoras
-# ##elevation = raster('J:/Pesquisadorxs/Anderson_Eduardo/DEM/DEM.tif')
-# predictors = stack(envVarPaths) #predictors com todas as variaveis (presente)
-# predictors = predictors[[c('bioclim_01','bioclim_12')]]
-# predictors = stack(mask(x=predictors, mask=AmSulShape))
-# crs(predictors) = CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0') #ajustando CRS
-# Nsp = NumRep #numero de especies a serem criadas e trabalhadas igual ao numero de replicas
-# SDMreplicates = 10 #numero de replicas para calibracao/validacao dos SDMs
-# statResultsSDMnormal = data.frame() #tabela de estatisticas basicas do modelo
-# statResultsSDMimproved = data.frame()
+### definindo prametros e variaveis globais ###
+projectFolder             = "C://Users//ACT//git//hcpa"  # pasta do projeto
+setwd(projectFolder)
+envVarFolder              = file.path('environmental_data', 'climate_data')  # pasta com as variaveis ambientais
+envVarPaths               = list.files(path = envVarFolder, full.names = TRUE)  # lista com os caminhos das camadas no sistema (comp.)
+AmSulShape                = rgdal::readOGR(file.path('utils', 'Am_Sul', 'borders.shp'))  # shape da America do Sul
+maxentFolder              = file.path('maxent', 'maxent.jar')  # pasta para resultados do maxent
+## spsTypes               = c('spHW', 'spHD', 'spCD')  # nomes das especies
+## sdmTypes               = c('normal','optimized')
+sampleSizes               = c(10, 20, 40, 80, 160)
+NumRep                    = 10  # numero de replicas (de cada cenario amostral)
+vies_levels               = 5  # niveis de vies espacial/geografico na amostragem dos pontos (1 = maior vies / 5 = sem vies algum)
+Nsp                       = NumRep  # numero de especies a serem criadas e trabalhadas igual ao numero de replicas
+SDMreplicates             = 10  # numero de replicas para calibracao/validacao dos SDMs
+statResultsSDMnormal      = data.frame()  # tabela de estatisticas basicas do modelo
+statResultsSDMimproved    = data.frame()
 
 
-## funcoes autorais :-) #NOTEBOOK
-source('/home/anderson/R-Scripts/makeSpeciesSuitability.R')
-source('/home/anderson/R-Scripts/rangeByAC.R')
-source('/home/anderson/R-Scripts/makeOutput.R')
-source('/home/anderson/R-Scripts/bestModel.R')
-
-## ## funcoes autorais :-) #LORIEN
-## source('D:/Anderson_Eduardo/SDM com pseudoausencias melhoradas/makeSpecies.R')
-## source('D:/Anderson_Eduardo/rangeByAC.R')
-## source('D:/Anderson_Eduardo/SDM com pseudoausencias melhoradas/makeOutput.R')
-## source('D:/Anderson_Eduardo/SDM com pseudoausencias melhoradas/bestModel.R')
-
-# ## funcoes autorais :-) #Yavanna
-# source('D:/Anderson_Eduardo/R/makeSpecies.R')
-# source('D:/Anderson_Eduardo/R/rangeByAC.R')
-# #source('D:/Anderson_Eduardo/R/makeOutput.R')
-# source('D:/Anderson_Eduardo/R/bestModel.R')
+### funcoes autorais ###
+source(file.path('utils', 'makeSpeciesSuitability.R'))
+source(file.path('utils', 'rangeByAC.R'))
+source(file.path('utils', 'makeOutput.R'))
+source(file.path('utils', 'bestModel.R'))
 
 
 
-
-##PARTE 1: CRIANDO AS ESPECIES ARTIFICIAIS
-
+### PARTE 1: CRIANDO AS ESPECIES ARTIFICIAIS ###
 
 
+# predictors com todas as variaveis (presente)
+predictors = stack(envVarPaths)
+predictors = predictors[[c('bioclim_01', 'bioclim_12')]]
+predictors = stack(
+  mask(
+    x = predictors, 
+    mask = AmSulShape
+  )
+)
+crs(predictors) = CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0')
 
-predictors = stack(list.files(path=envVarPaths[1],full.names=TRUE, pattern='.asc')) #predictors com todas as variaveis (presente)
-predictors = predictors[[c('bioclim_01','bioclim_12')]]
-predictors = stack(mask(x=predictors, mask=AmSulShape))
-crs(predictors) = CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0') #ajustando CRS
-
-#library(elevatr)
-#movResist = get_elev_raster(locations = predictors, z=7)
-elev = raster('/home/anderson/gridfiles/DEM.tif') #DEM
-elev = mask(x = elev, mask = AmSulShape) #mask for South America
-roug = terrain(x = elev, opt = 'roughness', unit = 'degrees') #rater layer for 'roughness'
-resfun = function(ro=roug){ 1/(1 + exp(+0.01*(ro - 200))) }
-resdata = calc(x = roug, fun = resfun)
+# library(elevatr)
+# movResist = get_elev_raster(locations = predictors, z=7)
+# DEM
+elev = raster(
+  file.path('environmental_data', 'DEM', 'DEM.tif')
+)
+# mask for South America
+elev = mask(
+  x = elev, 
+  mask = AmSulShape
+)
+# rater layer for 'roughness'
+roug = terrain(
+  x = elev, 
+  opt = 'roughness', 
+  unit = 'degrees'
+)
+resfun = function(ro=roug){ 
+  1/(1 + exp(+0.01*(ro - 200))) 
+}
+resdata = calc(
+  x = roug, 
+  fun = resfun
+)
 
 for(i in 1:Nsp){
   
-  cat('\n Inicializando simulação para a espécie', i)
+  cat('\nSimulation for the species #', i, sep='')
   
-  ##diretorio para o biomod2 salvar resultados para SDMnormal
-  setwd(file.path(projectFolder))
+  # diretorio para o biomod2 salvar resultados para SDMnormal
+  setwd(projectFolder)
   
-  ##verifica e cria diretorio para salvar resultados da especie atual
+  # verifica e cria diretorio para salvar resultados da especie atual
   if (file.exists('virtual species')){
-    setwd(paste(projectFolder,'/virtual species',sep=''))
+
+    setwd('virtual species')
+
   } else {
+
     dir.create('virtual species')
-    setwd(paste(projectFolder,'/virtual species',sep=''))
+    setwd(file.path(projectFolder, 'virtual species'))
+
   }
   
-  cat('\n Criando suitability da espécie', i)
+  cat('\nSimulation of ', 'species #', i, ' suitability', sep='')
+
   iterNich = 0
   nichePrevalence = 0
+
   while( (nichePrevalence < 0.1) | (nichePrevalence > 0.6) ){
-    SpSuitDist = makeSpeciesSuitability(predictors) #criando nicho e projetando sua distribuicao
+
+    # criando nicho e projetando sua distribuicao
+    SpSuitDist = makeSpeciesSuitability(predictors)
     
     rasterOnes = freq(SpSuitDist > 0.1, na.rm = TRUE)[2,2]
     rasterZeros = freq(SpSuitDist < 0.1, na.rm = TRUE)[1,2]
     nichePrevalence = rasterOnes/(rasterOnes + rasterZeros)
     
     iterNich = iterNich+1
+
     if (iterNich >= 10){
-      cat('\n Falha na criação do suitability da espécie', i,': algoritmo não convegiu.')
+      cat('\nSimulation for species #', i, ' has failed.', sep='')
       next
     }
+
   }
   
-  cat('\n Criando distribuição geográfica da espécie', i)
+  cat('\nSimulating geographical distribution for the species #', i, sep='')
+  
   iterDist = 0
   nichePrevalence = 0
+
   while( (nichePrevalence < 0.1) | (nichePrevalence > 0.6) ){
-    iter = round(runif(n = 1, min = 500, max = 1000)) #equivalent to varying dispertion rate (here, 1 step = 5km/year)
-    SpDistAC = rangeByAC(envAreas = SpSuitDist, movRes = resdata, iter = iter) #criando a area de distribuicao da sps (usando automato celular)
+
+    # equivalent to varying dispertion rate (here, 1 step = 5km/year)
+    iter = round(runif(n = 1, min = 500, max = 1000))
+    
+    # criando a area de distribuicao da sps (usando automato celular)
+    SpDistAC = rangeByAC(envAreas = SpSuitDist, movRes = resdata, iter = iter)
     
     rasterOnes = freq(SpDistAC > 0.1, na.rm = TRUE)[2,2]
     rasterZeros = freq(SpDistAC < 0.1, na.rm = TRUE)[1,2]
     nichePrevalence = rasterOnes/(rasterOnes + rasterZeros)
     
     iterDist = iterDist+1
+
     if (iterDist >= 10){
-      cat('\n Falha na criação da distribuição geográfica da espécie', i,': algoritmo não convegiu.')
+      cat('\nSimulation for species #', i, ' has failed.', sep='')
       next
     }
+
   }
   
-  ##salvando figura e dados da distribuicao de cada especie
-  cat('\n Salvando dados da espécie', i)
-  jpeg(filename=paste(projectFolder,'/virtual species/sp',i,'.jpeg',sep=''))
+  # salvando figura e dados da distribuicao de cada especie
+  cat('\nSaving species #', i, ' data', sep='')
+  jpeg(
+    filename = file.path(
+      projectFolder, 
+      'virtual species', 
+      paste('sp', i, '.jpeg', sep=''),
+    sep=''
+    )
+  )
   plot(SpDistAC)
   dev.off()
-  ##
-  writeRaster(x=SpDistAC, filename=paste(projectFolder,'/virtual species/sp',i,'.asc',sep=''), overwrite=TRUE)
-  rm(SpDistAC) ##teste do bug persistente
-  
-  cat('\n Simulação para a espécie', i, 'concluída com sucesso. \n')
-  
-}
 
+  writeRaster(
+    x = SpDistAC, 
+    filename = file.path(
+      projectFolder, 
+      'virtual species', 
+      paste('sp', i, '.asc', sep=''),
+      sep=''
+      ),
+    overwrite = TRUE
+  )
+
+  # teste do bug persistente
+  rm(SpDistAC)
+  
+  cat('\nSimulation for the species #', i, ' finished\n\n', sep='')
+
+}
 
 
 
 ##PARTE 2: SIMULANDO OS DATASETS
 
 
+# log file #
 
+# criando arquivo
+write.table(
+  x = NULL, 
+  file = file.path(projectFolder, 'logfileSDMnormalDatasets.txt')
+)
 
-##arquivo de log
-write.table(x=NULL, file=paste(projectFolder,'/logfileSDMnormalDatasets.txt',sep='')) #criando arquivo
-cat('Log file - Started at: ', as.character(Sys.time()), "\n \n", file=paste(projectFolder,'/logfileSDMnormalDatasets.txt',sep=''), append=TRUE) #gravando no arquivo
+# gravando no arquivo
+cat(
+  'Log file - Started at: ', 
+  as.character(Sys.time()), 
+  "\n \n", 
+  file = paste(
+    projectFolder, 
+    '/logfileSDMnormalDatasets.txt', 
+    sep=''
+  ),
+  append = TRUE
+)
 
 for(i in 1:Nsp){
+
   for(j in 1:length(sampleSizes)){
+
     for(current_vies_level in 1:vies_levels){
       tryCatch({
         
-        ##logfile
-        cat('STARTING SCENARIO: sp = ', i, '/ sampleSizes = ', sampleSizes[j], '/ current_vies_level = ', current_vies_level, ' / time: ', as.character(Sys.time()), "\n \n", file = paste(projectFolder,'/logfileSDMnormalDatasets.txt',sep=''), append = TRUE) #gravando no arquivo
+        # logfile
+        cat('STARTING SCENARIO: sp = ', 
+            i, 
+            '/ sampleSizes = ', 
+            sampleSizes[j], 
+            '/ current_vies_level = ', 
+            current_vies_level, 
+            ' / time: ', 
+            as.character(Sys.time()),
+            "\n \n",
+            file = file.path(projectFolder, 'logfileSDMnormalDatasets.txt'),
+            append = TRUE
+        )
         
         ##diretorio de trabalho do projeto
-        setwd(file.path(projectFolder))
+        setwd(projectFolder)
         
         ##verifica e cria diretorio para salvar datasets 
-        if (file.exists(paste(projectFolder,'/datasets', sep=''))){
-          setwd(paste(projectFolder,'/datasets', sep=''))
+        if (file.exists('datasets')){
+          
+          setwd('datasets')
+          
         } else {
-          dir.create(paste(projectFolder,'/datasets',sep=''), recursive=TRUE)
-          setwd(paste(projectFolder,'/datasets', sep=''))
+          
+          dir.create('datasets')
+          setwd(file.path(projectFolder, 'datasets'))
+          
         }
         
         ##verifica e cria diretorio para salvar bias layers
-        if (!file.exists(paste(projectFolder,'/biasLayers', sep=''))){
-          dir.create(paste(projectFolder,'/biasLayers', sep=''))
+        if (!file.exists(file.path(projectFolder, 'biasLayers'))){
+          
+          dir.create(file.path(projectFolder, 'biasLayers'))
+
         }
         
         
-        ##definindo variaveis e parametros locais
-        ##occPoints = read.csv(paste(mainSampleFolder,sdmTypes[h],'/',spsTypes[i],'/occ',sampleSizes[j],'.csv',sep=''),header=TRUE) #abrindo pontos de ocorrencia
-        SpDistAC = raster(paste(projectFolder,'/virtual species/sp',i,'.asc',sep=''))
+        # definindo variaveis e parametros locais
+        SpDistAC = raster(
+          file.path(
+            projectFolder, 
+            'virtual species', 
+            paste('sp', i, '.asc', sep='')
+          )
+        )
         values(SpDistAC)[values(SpDistAC)==0] = NA
-        vies_i = sample(x=sequence(vies_levels), size=current_vies_level) #aqui: escolhendo quais dos centroids do Kmeans sera usado (obs.: 'level' de 'bias' eh a quantidade de centroides)
+        # aqui: escolhendo quais dos centroids do Kmeans sera usado (obs.: 'level' de 'bias' eh a quantidade de centroides)
+        vies_i = sample(x=sequence(vies_levels), size=current_vies_level)
         
         
-        ##bias layer da iteracao atual - sps range
-        SpDistAC = raster(paste(projectFolder,'/virtual species/sp',i,'.asc',sep=''))     
+        # bias layer da iteracao atual - sps range
+        SpDistAC = raster(
+          file.path(
+            projectFolder, 
+            'virtual species', 
+            paste('sp', i, '.asc', sep='')
+          )
+        )
         crs(SpDistAC) =  CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0')
-        biasLayerBGpts =  data.frame( dismo::randomPoints(mask=SpDistAC, n=100, prob=TRUE) )
-        ptsCluster = kmeans(x=biasLayerBGpts, centers=5, nstart=5)
+        biasLayerBGpts =  data.frame(
+          dismo::randomPoints(
+            mask = SpDistAC, 
+            n = 100, 
+            prob = TRUE
+          )
+        )
+        ptsCluster = kmeans(
+          x = biasLayerBGpts, 
+          centers = 5, 
+          nstart = 5
+        )
         biasLayerBGpts$kcluster = ptsCluster$cluster
-        biasLayerBGpts = biasLayerBGpts[ sapply(biasLayerBGpts$kcluster, function(x) x  %in% vies_i), ]
+        biasLayerBGpts = biasLayerBGpts[
+          sapply(
+            biasLayerBGpts$kcluster, 
+            function(x) x  %in% vies_i),
+        ]
         
-        
-        ##KDE
+        # KDE
         bgArea = SpDistAC*0 #predictors[[1]]*0
         crs(bgArea) = CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0')
-        biasLayer = data.frame(biasLayerBGpts[,1:2])
+        biasLayer = data.frame(biasLayerBGpts[, 1:2])
         coordinates(biasLayer) = ~x+y
-        proj4string(biasLayer) <- CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0')
+        proj4string(biasLayer) = CRS('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0')
         biasLayerBGptsKDE = MASS::kde2d(x=biasLayer$x, y=biasLayer$y, n=100, lims=c(xl=extent(bgArea)@xmin, xu=extent(bgArea)@xmax, yl=extent(bgArea)@ymin, yu=extent(bgArea)@ymax ))
-        ##raster
+        # raster
         biasLayerBGptsKDE = raster(biasLayerBGptsKDE)
         biasLayerBGptsKDE = mask(biasLayerBGptsKDE, AmSulShape)
         extent(biasLayerBGptsKDE) = extent(SpDistAC)
-        ##ajustando projecao, etc (com cuidado para nao quebrar com o grau de tolerancia)
-        biasLayerBGptsKDE = projectRaster(biasLayerBGptsKDE, crs=proj4string(bgArea), res=res(bgArea), method="bilinear")
+        # ajustando projecao, etc (com cuidado para nao quebrar com o grau de tolerancia)
+        biasLayerBGptsKDE = projectRaster(
+          biasLayerBGptsKDE, 
+          crs = proj4string(bgArea), 
+          res = res(bgArea), 
+          method = "bilinear"
+        )
         tolerance = 0.1
-        biasLayerBGptsKDEtry = try( merge(biasLayerBGptsKDE, bgArea, tolerance=tolerance), silent=TRUE )
+        biasLayerBGptsKDEtry = try(
+          merge(
+            biasLayerBGptsKDE, 
+            bgArea, 
+            tolerance = tolerance
+          ), 
+          silent = TRUE
+        )
         while('try-error' %in% class(biasLayerBGptsKDEtry)){
-          tolerance = tolerance+0.5
-          biasLayerBGptsKDEtry = merge(biasLayerBGptsKDE, bgArea, tolerance=tolerance)
+          tolerance = tolerance + 0.5
+          biasLayerBGptsKDEtry = merge(
+            biasLayerBGptsKDE, 
+            bgArea, 
+            tolerance = tolerance
+          )
         }
         biasLayerBGptsKDE = biasLayerBGptsKDEtry
-        biasLayerBGptsKDE = crop(x=biasLayerBGptsKDE, y=bgArea)
+        biasLayerBGptsKDE = crop(
+          x = biasLayerBGptsKDE, 
+          y = bgArea
+        )
         extent(biasLayerBGptsKDE) = extent(bgArea)
         biasLayerBGptsKDE = biasLayerBGptsKDE/biasLayerBGptsKDE@data@max #ajustando entre 0 e 1
-        values(biasLayerBGptsKDE)[which(values(biasLayerBGptsKDE)<=0)] = 0
-        ##salvando
-        writeRaster(biasLayerBGptsKDE, paste(projectFolder,'/biasLayers/','sp',i,'_sampleSizes',sampleSizes[j],'_biasLevel',current_vies_level,'.asc', sep=''), overwrite=TRUE)
+        values(biasLayerBGptsKDE)[which(values(biasLayerBGptsKDE) <= 0)] = 0
+        # salvando
+        writeRaster(
+          biasLayerBGptsKDE,
+          file.path(
+            projectFolder, 
+            'biasLayers',
+            paste('sp', i, '_sampleSize', sampleSizes[j], '_biasLevel', current_vies_level, '.asc', sep='')
+          ),
+          overwrite = TRUE
+        )
         
-        ##dados de ocorrencia
-        occPoints = dismo::randomPoints(mask=SpDistAC*biasLayerBGptsKDE, n=sampleSizes[j], prob=TRUE) #sorteando pontos da distribuicao modelada
-        ##rm(SpDistAC) ##teste do bug persistente
-        occPoints = data.frame(lon=occPoints[,1],lat=occPoints[,2])
-        write.csv(occPoints, paste(projectFolder,'/datasets/','occ_sp',i,'_sampleSizes',sampleSizes[j],'_biasLevel',current_vies_level,'.csv', sep=''), row.names = FALSE)
+        # dados de ocorrencia
+        occPoints = dismo::randomPoints(
+          mask = SpDistAC*biasLayerBGptsKDE, 
+          n = sampleSizes[j], 
+          prob = TRUE
+        )
+        occPoints = data.frame(
+          lon = occPoints[,1],
+          lat = occPoints[,2]
+        )
+        write.csv(
+          occPoints,
+          file.path(
+            projectFolder, 
+            'datasets', 
+            paste('occ_sp',i,'_sampleSizes',sampleSizes[j],'_biasLevel',current_vies_level,'.csv', sep='')),
+          row.names = FALSE
+        )
         
-        ##backgrownd points
-        bgPoints = dismo::randomPoints(mask=biasLayerBGptsKDE, p=occPoints, n=10000, prob=TRUE) #sorteando pontos da distribuicao modelada
-        bgPoints = data.frame(lon=bgPoints[,1], lat=bgPoints[,2])
-        write.csv(bgPoints, paste(projectFolder,'/datasets/','bg_sp',i,'_sampleSizes',sampleSizes[j],'_biasLevel',current_vies_level,'.csv', sep=''), row.names = FALSE)
+        # backgrownd points
+        bgPoints = dismo::randomPoints(
+          mask = biasLayerBGptsKDE, 
+          p = occPoints, 
+          n = 10000, 
+          prob = TRUE
+        )
+        bgPoints = data.frame(
+          lon = bgPoints[, 1], 
+          lat = bgPoints[, 2]
+        )
+        write.csv(
+          bgPoints,
+          file.path(
+            projectFolder,
+            'datasets',
+            paste('bg_sp',i,'_sampleSizes',sampleSizes[j],'_biasLevel',current_vies_level,'.csv', sep='')
+          ),
+          row.names = FALSE
+        )
         
       }, error=function(e){cat("ERROR :",conditionMessage(e), "\n \n", file=paste(projectFolder,'/logfileSDMnormalDatasets.txt',sep=''), append=TRUE)})
       
@@ -271,77 +391,192 @@ for(i in 1:Nsp){
 
 
 
-
-##PARTE 3: SDMs COM BIOMOD2
-
+### PARTE 3: SDMs COM BIOMOD2 ###
 
 
+# arquivo de log #
 
-##arquivo de log
-write.table(x=NULL, file=paste(projectFolder,'/logfileSDMnormalBiomod2.txt',sep='')) #criando arquivo
-cat('Log file - Started at: ', as.character(Sys.time()), "\n \n", file=paste(projectFolder,'/logfileSDMnormalBiomod2.txt',sep=''), append=TRUE) #gravando no arquivo
+# criando arquivo
+write.table(
+  x = NULL, 
+  file = file.path(projectFolder, 'logfileSDMnormalBiomod2.txt')
+  )
+
+# gravando no arquivo
+cat('Log file - Started at: ', 
+    as.character(Sys.time()), 
+    "\n \n", 
+    file = file.path(projectFolder, 'logfileSDMnormalBiomod2.txt'),
+    append = TRUE
+)
 
 for(i in 1:Nsp){
+
   for(j in 1:length(sampleSizes)){
+
     for(current_vies_level in 1:vies_levels){
       tryCatch({
         
-        ##logfile
-        cat('STARTING SCENARIO: sp = ', i, '/ sampleSizes = ', sampleSizes[j], '/ current_vies_level = ', current_vies_level, ' / time: ', as.character(Sys.time()), "\n \n", file = paste(projectFolder,'/logfileSDMnormalBiomod2.txt',sep=''), append = TRUE) #gravando no arquivo
+        # logfile
+        cat(
+          'STARTING SCENARIO: sp = ', 
+          i, 
+          '/ sampleSizes = ', 
+          sampleSizes[j], 
+          '/ current_vies_level = ', 
+          current_vies_level, 
+          ' / time: ', 
+          as.character(Sys.time()), 
+          "\n \n", 
+          file = file.path(projectFolder, 'logfileSDMnormalBiomod2.txt'), 
+          append = TRUE
+        )
         
-        ##diretorio de trabalho do projeto
-        setwd(file.path(projectFolder))
+        # diretorio de trabalho do projeto
+        setwd(projectFolder)
         
-        ##verifica e cria diretorio para salvar datasets 
-        if (file.exists(paste(projectFolder,'/SDMnormal', sep=''))){
-          setwd(paste(projectFolder,'/SDMnormal', sep=''))
+        # verifica e cria diretorio para salvar datasets
+        if (file.exists('SDMnormal')){
+          
+          setwd('SDMnormal')
+          
         } else {
-          dir.create(paste(projectFolder,'/SDMnormal',sep=''), recursive=TRUE)
-          setwd(paste(projectFolder,'/SDMnormal', sep=''))
+          
+          dir.create('SDMnormal')
+          setwd(file.path(projectFolder, 'SDMnormal'))
+          
         }
         
-        ##dataset
-        occPoints = read.csv(paste(projectFolder,'/datasets/','occ_sp',i,'_sampleSizes',sampleSizes[j],'_biasLevel',current_vies_level,'.csv', sep=''))
+        # dataset
+        occPoints = read.csv(
+          file.path(
+            projectFolder,
+            'datasets',
+            paste(
+              'occ_sp',
+              i,
+              '_sampleSizes',
+              sampleSizes[j],
+              '_biasLevel',
+              current_vies_level,
+              '.csv', 
+              sep=''
+            )
+          )
+        )
         occPoints$pres = 1
-        bgPoints =  read.csv(paste(projectFolder,'/datasets/','bg_sp',i,'_sampleSizes',sampleSizes[j],'_biasLevel',current_vies_level,'.csv', sep=''))
+        bgPoints =  read.csv(
+          file.path(
+            projectFolder,
+            'datasets',
+            paste(
+              'bg_sp',
+              i,
+              '_sampleSizes',
+              sampleSizes[j],
+              '_biasLevel',
+              current_vies_level,
+              '.csv', 
+              sep='')
+          )
+        )
         bgPoints$pres = 0
         dataSet = rbind(occPoints, bgPoints)
         
-        ##preditoras
-        ##analisando correlacao das variaveis
-        predictorsForVif = stack(list.files(path=envVarPaths[1],full.names=TRUE, pattern='.asc')) #predictors com todas as variaveis (presente)
-        crs(predictorsForVif) = CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0') #ajustando CRS
-        predictorsForVif = mask(x=predictorsForVif, mask=AmSulShape)
+        # preditoras #
+
+        # analisando correlacao das variaveis
+        predictorsForVif = stack(envVarPaths)
+        crs(predictorsForVif) = CRS(
+          '+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0'
+        )
+        predictorsForVif = mask(
+          x = predictorsForVif, 
+          mask = AmSulShape
+        )
         
         vif(predictorsForVif)
-        predictorsVif1 = vifcor(predictorsForVif, th=0.7)
+        predictorsVif1 = vifcor(
+          predictorsForVif, 
+          th = 0.7
+        )
         
-        ##preditoras com as variaveis selecionadas
-        predictors = predictorsForVif[[ grep(pattern=paste(as.character(predictorsVif1@results$Variables), collapse='|'), x=names(predictorsForVif)) ]]
+        # preditoras com as variaveis selecionadas
+        predictors = predictorsForVif[[ 
+          grep(
+            pattern = paste(as.character(predictorsVif1@results$Variables), collapse='|'), 
+            x = names(predictorsForVif)
+          ) 
+        ]]
         
-        ##verifica e cria diretorio para salvar datasets 
-        folder_path = paste(projectFolder, '/SDMnormal/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMnormal', sep='')
+        # verifica e cria diretorio para salvar datasets
+        folder_path = file.path(
+          'SDMnormal',
+          paste(
+            'sp', 
+            i, 
+            '.sample', 
+            sampleSizes[j], 
+            '.biaslevel',
+            current_vies_level,
+            '.SDMnormal', 
+            sep=''
+          )
+        )
         
-        if (file.exists(folder_path)){
-          save(predictors, file=paste(projectFolder, '/SDMnormal/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMnormal/predictors.RData', sep=''))
-        } else {
+        if (!file.exists(folder_path)){
+          
           dir.create(folder_path, recursive=TRUE)
-          save(predictors, file=paste(projectFolder, '/SDMnormal/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMnormal/predictors.RData', sep=''))
+
         }
         
-        ##arquivo de log da selecao de variaveis
-        cat("Output of variable selection for the current sps (using the R funtion 'vifcor' from usdm package): \n \n", file=paste(projectFolder,'/logfileSDMnormalBiomod2.txt',sep=''), append=TRUE) #gravando no arquivo
-        capture.output(predictorsVif1, file=paste(projectFolder,'/logfileSDMnormalBiomod2.txt',sep=''), append = TRUE)
+        save(
+          predictors, 
+          file = file.path(
+            'SDMnormal',
+            paste(
+              'sp',
+              i, 
+              '.sample', 
+              sampleSizes[j], 
+              '.biaslevel',
+              current_vies_level,
+              '.SDMnormal', 
+              sep=''),
+            'predictors.RData'
+          )
+        )
+        
+        # arquivo de log da selecao de variaveis
+        cat(
+          "Output of variable selection for the current sps (using the R funtion 'vifcor' from usdm package): \n \n", 
+          file = file.path(
+            projectFolder,
+            'logfileSDMnormalBiomod2.txt'
+          ), 
+          append = TRUE
+        )
+        capture.output(
+          predictorsVif1, 
+          file = file.path(
+            projectFolder,
+            'logfileSDMnormalBiomod2.txt'
+          ),
+          append = TRUE
+        )
      
         # myResp <- data.frame(lon=occPoints[,1], lat=occPoints[,2])
         # coordinates(myResp) <- ~ lon + lat #transformando em spatialPoints
         # crs(myResp) = CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0') #transformando em spatialPoints
         
-        ##variaveis e parametros locais especificos para o biomod2
-        myRespName <- paste('sp',i,sep='')  # nome do cenario atual (para biomod2)
-        myResp <- dataSet[,c('pres')] # variavel resposta (para biomod2)
-        myRespXY <- dataSet[,c('lon','lat')] # coordenadas associadas a variavel resposta (para biomod2)
-        myExpl = extract(predictors, dataSet[,c('lon','lat')]) #variavel preditora (para biomod2)
+        # variaveis e parametros locais especificos para o biomod2
+        myRespName = paste('sp', i, sep='')  # nome do cenario atual (para biomod2)
+        myResp = dataSet[, c('pres')] # variavel resposta (para biomod2)
+        myRespXY = dataSet[, c('lon','lat')] # coordenadas associadas a variavel resposta (para biomod2)
+        myExpl = extract(
+          predictors, 
+          dataSet[, c('lon','lat')]
+        ) #variavel preditora (para biomod2)
         
         ##ajuste de dados de entrada para biomod2
         # myBiomodData <- BIOMOD_FormatingData(resp.var = myResp,
@@ -350,13 +585,24 @@ for(i in 1:Nsp){
         #                                      PA.nb.rep = 0,
         #                                      PA.nb.absences = 10000)
         
-        myBiomodData <- BIOMOD_FormatingData(resp.var = myResp,
-                                             expl.var = myExpl,
-                                             resp.xy = myRespXY,
-                                             resp.name = paste(myRespName,'_sample',sampleSizes[j],'_biaslevel',current_vies_level,'_SDMnormal',sep=''))
+        myBiomodData = BIOMOD_FormatingData(
+          resp.var = myResp,
+          expl.var = myExpl,
+          resp.xy = myRespXY,
+          resp.name = paste(
+            myRespName,
+            '_sample',
+            sampleSizes[j],
+            '_biaslevel',
+            current_vies_level,
+            '_SDMnormal',
+            sep=''
+          )
+        )
         
-        ##parametrizando os modelos
-        myBiomodOption <- BIOMOD_ModelingOptions(
+        # parametrizando os modelos
+        myBiomodOption = BIOMOD_ModelingOptions(
+
           MAXENT.Phillips = list(path_to_maxent.jar = maxentFolder,
                                  jackknife = FALSE,
                                  randomseed = FALSE,
@@ -372,6 +618,7 @@ for(i in 1:Nsp){
                                  doclamp = FALSE,
                                  fadebyclamping = FALSE,
                                  threads = 2),
+
           GLM = list( type = 'quadratic',
                       interaction.level = 0,
                       myFormula = NULL,
@@ -379,6 +626,7 @@ for(i in 1:Nsp){
                       family = binomial(link = 'logit'),
                       mustart = 0.5,
                       control = glm.control(epsilon = 1e-07, maxit = 100, trace = FALSE)),
+
           GAM = list( algo = 'GAM_mgcv',
                       type = 's_smoother',
                       k = -1,
@@ -390,15 +638,40 @@ for(i in 1:Nsp){
                       select = FALSE,
                       knots = NULL,
                       paraPen = NULL,
-                      control = list(nthreads = 1, irls.reg = 0, epsilon = 1e-07,
-                                     maxit = 200, trace = FALSE, mgcv.tol = 1e-07, mgcv.half = 15,
-                                     rank.tol = 1.49011611938477e-08,
-                                     nlm = list(ndigit=7, gradtol=1e-06, stepmax=2, steptol=1e-04, iterlim=200, check.analyticals=0),
-                                     optim = list(factr=1e+07),
-                                     newton = list(conv.tol=1e-06, maxNstep=5, maxSstep=2, maxHalf=30, use.svd=0),
-                                     outerPIsteps = 0, idLinksBases = TRUE, scalePenalty = TRUE, keepData = FALSE,
-                                     scale.est = 'fletcher', edge.correct = FALSE)),
-          MARS = list( type = 'simple',
+                      control = list(
+                        nthreads = 1, 
+                        irls.reg = 0, 
+                        epsilon = 1e-07,
+                        maxit = 200, 
+                        trace = FALSE, 
+                        mgcv.tol = 1e-07, 
+                        mgcv.half = 15, 
+                        rank.tol = 1.49011611938477e-08,
+                        nlm = list(
+                          ndigit = 7, 
+                          gradtol = 1e-06, 
+                          stepmax = 2, 
+                          steptol = 1e-04, 
+                          iterlim = 200, 
+                          check.analyticals = 0
+                        ),
+                        optim = list(factr = 1e+07),
+                        newton = list(
+                          conv.tol = 1e-06, 
+                          maxNstep = 5, 
+                          maxSstep = 2, 
+                          maxHalf = 30, 
+                          use.svd = 0
+                        ),
+                        outerPIsteps = 0, 
+                        idLinksBases = TRUE, 
+                        scalePenalty = TRUE, 
+                        keepData = FALSE,
+                        scale.est = 'fletcher', 
+                        edge.correct = FALSE
+                      ) ),
+
+            MARS = list( type = 'simple',
                        interaction.level = 0,
                        myFormula = NULL,
                        nk = NULL,
@@ -406,10 +679,17 @@ for(i in 1:Nsp){
                        thresh = 0.001,
                        nprune = NULL,
                        pmethod = 'backward'),
+
           CTA = list( method = 'class',
                       parms = 'default',
                       cost = NULL,
-                      control = list(xval = 5, minbucket = 5, minsplit = 5, cp = 0.001, maxdepth = 25)),
+                      control = list(
+                        xval = 5, 
+                        minbucket = 5, 
+                        minsplit = 5, 
+                        cp = 0.001, 
+                        maxdepth = 25) ),
+
           GBM = list( distribution = 'bernoulli',
                       n.trees = 2500,
                       interaction.depth = 7,
@@ -421,14 +701,16 @@ for(i in 1:Nsp){
                       keep.data = FALSE,
                       verbose = FALSE,
                       perf.method = 'cv'),
+
           RF = list( do.classif = TRUE,
                      ntree = 500,
                      mtry = 'default',
                      nodesize = 5,
                      maxnodes = NULL)
+
         )                        
         
-        ##rodando o(s) algoritmo(s) (i.e. SDMs)
+        # rodando o(s) algoritmo(s) (i.e. SDMs)
         myBiomodModelOut <- BIOMOD_Modeling(
           data = myBiomodData,
           models = c('MAXENT.Phillips','GLM','GAM','MARS','CTA','GBM','RF'),
@@ -437,16 +719,40 @@ for(i in 1:Nsp){
           DataSplit = 80,
           models.eval.meth = c('TSS','ROC'),
           do.full.models = FALSE,
-          modeling.id = paste(myRespName,'_sample',sampleSizes[j],'_SDMnormal',sep=''))
+          modeling.id = paste(
+            myRespName,
+            '_sample',
+            sampleSizes[j],
+            '_SDMnormal',
+            sep='')
+        )
         
         ##My output data
-        evaluationScores = get_evaluations(myBiomodModelOut, as.data.frame=TRUE)
+        evaluationScores = get_evaluations(
+          myBiomodModelOut, 
+          as.data.frame = TRUE
+        )
         
         ##outputs 
-        statResultsSDMnormal = rbind(statResultsSDMnormal,
-                                     data.frame(SDM='normal', sp=paste('sp',i,sep=''), sampleSize=sampleSizes[j], biaslevel=current_vies_level, evaluationScores))
-        write.csv(statResultsSDMnormal, file=paste(projectFolder,'/SDMnormal/StatisticalResults_SDMnormal.csv',sep=''), row.names=FALSE)
-        
+        statResultsSDMnormal = rbind(
+          statResultsSDMnormal,
+          data.frame(
+            SDM = 'normal', 
+            sp = paste('sp', i, sep=''), 
+            sampleSize = sampleSizes[j], 
+            biaslevel = current_vies_level, 
+            evaluationScores
+          )
+        )
+        write.csv(
+          statResultsSDMnormal, 
+          file = file.path(
+            projectFolder,
+            'SDMnormal',
+            'StatisticalResults_SDMnormal.csv'
+          ),
+          row.names = FALSE
+        )
       }, error=function(e){cat("ERROR :",conditionMessage(e), "\n \n", file=paste(projectFolder,'/logfileSDMnormalBiomod2.txt',sep=''), append=TRUE)})
     }
   }
