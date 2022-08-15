@@ -15,7 +15,7 @@ library(dismo)
 library(usdm)
 
 ### definindo prametros e variaveis globais ###
-projectFolder             = "C://Users//ACT//git//hcpa"  # pasta do projeto
+projectFolder             = "C:/Users/ACT/git/hcpa"  # pasta do projeto (preencher para sua máquina!)
 setwd(projectFolder)
 envVarFolder              = file.path('environmental_data', 'climate_data')  # pasta com as variaveis ambientais
 envVarPaths               = list.files(path = envVarFolder, full.names = TRUE)  # lista com os caminhos das camadas no sistema (comp.)
@@ -42,6 +42,9 @@ source(file.path('utils', 'bestModel.R'))
 
 ### PARTE 1: CRIANDO AS ESPECIES ARTIFICIAIS ###
 
+
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 # predictors com todas as variaveis (presente)
 predictors = stack(envVarPaths)
@@ -81,7 +84,7 @@ resdata = calc(
 
 for(i in 1:Nsp){
   
-  cat('\nSimulation for the species #', i, sep='')
+  cat('\n### Implementation of species #', i, ' ###', sep='')
   
   # diretorio para o biomod2 salvar resultados para SDMnormal
   setwd(projectFolder)
@@ -182,6 +185,9 @@ for(i in 1:Nsp){
 
 ##PARTE 2: SIMULANDO OS DATASETS
 
+
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 # log file #
 
@@ -394,6 +400,9 @@ for(i in 1:Nsp){
 ### PARTE 3: SDMs COM BIOMOD2 ###
 
 
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
+
 # arquivo de log #
 
 # criando arquivo
@@ -486,7 +495,7 @@ for(i in 1:Nsp){
         # preditoras #
 
         # analisando correlacao das variaveis
-        predictorsForVif = stack(envVarPaths)
+        predictorsForVif = stack(file.path('..', envVarPaths))
         crs(predictorsForVif) = CRS(
           '+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0'
         )
@@ -511,7 +520,7 @@ for(i in 1:Nsp){
         
         # verifica e cria diretorio para salvar datasets
         folder_path = file.path(
-          'SDMnormal',
+          # 'SDMnormal',
           paste(
             'sp', 
             i, 
@@ -533,7 +542,7 @@ for(i in 1:Nsp){
         save(
           predictors, 
           file = file.path(
-            'SDMnormal',
+            # 'SDMnormal',
             paste(
               'sp',
               i, 
@@ -764,7 +773,8 @@ for(i in 1:Nsp){
 ##PARTE 4: IMPLEMENTANDO SDMs COM OS MODELOS MAIS SIMPLES (MAHALANOBIS, BIOCLIM, DOMAIN)
 
 
-
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 ##arquivo de log
 write.table(x=NULL, file=paste(projectFolder,'/logfileSDMnormalOutrosModelos.txt',sep='')) #criando arquivo
@@ -889,7 +899,8 @@ for(i in 1:Nsp){
 ##PARTE 5: SELECIONANDO MELHOR MODELO E IMPLEMENTANDO PROJECOES DOS SDMs
 
 
-
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 ##arquivo de log
 write.table(x=NULL, file=paste(projectFolder,'/logfileSDMnormalProjecoes.txt',sep='')) #criando arquivo
@@ -959,6 +970,8 @@ for(i in 1:Nsp){
 ##PARTE 6: implementando datasets com pseudoausencias melhoradas (HCPA)
 
 
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 
 ##arquivo de log
@@ -1043,13 +1056,14 @@ for(i in 1:Nsp){
 ##PARTE 7: SDMs USANDO HCPA COM BIOMOD2 - SDMimproved
 
 
-
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 ##arquivo de log
 write.table(x=NULL, file=paste(projectFolder,'/logfileSDMimprovedBiomod2.txt',sep='')) #criando arquivo
 cat('Log file - Started at: ', as.character(Sys.time()), "\n \n", file=paste(projectFolder,'/logfileSDMimprovedBiomod2.txt',sep=''), append=TRUE) #gravando no arquivo
 
-for(i in 3:Nsp){
+for(i in 1:Nsp){
   for(j in 1:length(sampleSizes)){
     for(current_vies_level in 1:vies_levels){
       tryCatch({
@@ -1078,7 +1092,8 @@ for(i in 3:Nsp){
         
         ##preditoras
         ##analisando correlacao das variaveis
-        predictorsForVif = stack(list.files(path=envVarPaths[1],full.names=TRUE, pattern='.asc')) #predictors com todas as variaveis (presente)
+        predictorsForVif = stack(file.path('..', envVarPaths)) #predictors com todas as variaveis (presente)
+        
         crs(predictorsForVif) = CRS('+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0') #ajustando CRS
         predictorsForVif = mask(x=predictorsForVif, mask=AmSulShape)
         
@@ -1089,13 +1104,60 @@ for(i in 3:Nsp){
         predictors = predictorsForVif[[ grep(pattern=paste(as.character(predictorsVif1@results$Variables), collapse='|'), x=names(predictorsForVif)) ]]
         
         ##verifica e cria diretorio para salvar datasets 
-        folder_path = paste(projectFolder, '/SDMimproved/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMimproved', sep='')
-        
+        # folder_path = paste(projectFolder, 
+        folder_path = file.path(
+          projectFolder,
+          'SDMimproved',
+          paste(
+            'sp', 
+            i, 
+            '.sample', 
+            sampleSizes[j], 
+            '.biaslevel',
+            current_vies_level,
+            '.SDMimproved', 
+            sep=''
+          )
+        )
+
         if (file.exists(folder_path)){
-          save(predictors, file=paste(projectFolder, '/SDMimproved/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMimproved/predictors.RData', sep=''))
+          save(
+            predictors, 
+            file=file.path(
+              projectFolder,
+              'SDMimproved',
+              paste(
+                'sp', 
+                i, 
+                '.sample', 
+                sampleSizes[j], 
+                '.biaslevel',
+                current_vies_level,
+                '.SDMimproved', sep=''
+              ),
+              'predictors.RData'
+            )
+          )
         } else {
           dir.create(folder_path, recursive=TRUE)
-          save(predictors, file=paste(projectFolder, '/SDMimproved/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMimproved/predictors.RData', sep=''))
+          save(
+            predictors, 
+            file=file.path(
+              projectFolder,
+              'SDMimproved',
+              paste(
+                'sp', 
+                i, 
+                '.sample', 
+                sampleSizes[j], 
+                '.biaslevel',
+                current_vies_level,
+                '.SDMimproved', 
+                sep=''
+              ),
+              'predictors.RData'
+            )
+          )
         }
         
         ##arquivo de log da selecao de variaveis
@@ -1216,8 +1278,10 @@ for(i in 3:Nsp){
         evaluationScores = get_evaluations(myBiomodModelOut, as.data.frame=TRUE)
         
         ##outputs 
-        statResultsSDMimproved = rbind(statResultsSDMimproved,
-                                     data.frame(SDM='improved', sp=paste('sp',i,sep=''), sampleSize=sampleSizes[j], biaslevel=current_vies_level, evaluationScores))
+        statResultsSDMimproved = rbind(
+          statResultsSDMimproved,
+          data.frame(SDM='improved', sp=paste('sp',i,sep=''), sampleSize=sampleSizes[j], biaslevel=current_vies_level, evaluationScores)
+        )
         write.csv(statResultsSDMimproved, file=paste(projectFolder,'/SDMimproved/StatisticalResults_SDMimproved.csv',sep=''), row.names=FALSE)
         
       }, error=function(e){cat("ERROR :",conditionMessage(e), "\n \n", file=paste(projectFolder,'/logfileSDMimprovedBiomod2.txt',sep=''), append=TRUE)})
@@ -1231,7 +1295,8 @@ for(i in 3:Nsp){
 ##PARTE 8: IMPLEMENTANDO SDMs COM OS MODELOS MAIS SIMPLES (MAHALANOBIS, BIOCLIM, DOMAIN)
 
 
-
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 ##arquivo de log
 write.table(x=NULL, file=paste(projectFolder,'/logfileSDMimprovedOutrosModelos.txt',sep='')) #criando arquivo
@@ -1359,7 +1424,8 @@ for(i in 1:Nsp){
 ##PARTE 5: SELECIONANDO MELHOR MODELO-HCPA E IMPLEMENTANDO PROJECOES DOS SDMs-HCPA
 
 
-
+##resetando o diretorio de trabalho atual do R
+setwd(projectFolder)
 
 ##arquivo de log
 write.table(x=NULL, file=paste(projectFolder,'/logfileSDMimprovedProjecoes.txt',sep='')) #criando arquivo
