@@ -133,6 +133,8 @@ for(i in 1:Nsp){
 
     # equivalent to varying dispertion rate (here, 1 step = 5km/year)
     iter = round(runif(n = 1, min = 500, max = 1000))
+    dispersion_coefficient = round(i/1000, digits = 3)
+    cat('\n    *Dispersion coefficient for the species #', dispersion_coefficient, ': ', iter, sep='')
     
     # criando a area de distribuicao da sps (usando automato celular)
     SpDistAC = rangeByAC(envAreas = SpSuitDist, movRes = resdata, iter = iter)
@@ -425,6 +427,13 @@ for(i in 1:Nsp){
 
     for(current_vies_level in 1:vies_levels){
       tryCatch({
+
+          print(
+            paste(
+              '[', Sys.time(), '] Running scenario: species #', i, 
+              ', sample size ', j, ', bias level ',  current_vies_level, sep=''
+            )
+          )
         
         # logfile
         cat(
@@ -788,6 +797,13 @@ for(i in 1:Nsp){
     for(current_vies_level in 1:vies_levels){
       tryCatch({
         
+        print(
+          paste(
+            '[', Sys.time(), '] Running scenario: species #', i, 
+            ', sample size ', sampleSizes[j], ', bias level ',  current_vies_level, sep=''
+          )
+        )
+        
         ##logfile
         cat('STARTING SCENARIO: sp = ', i, '/ sampleSizes = ', sampleSizes[j], '/ current_vies_level = ', current_vies_level, ' / time: ', as.character(Sys.time()), "\n \n", file=paste(projectFolder,'/logfileSDMnormalOutrosModelos.txt',sep=''), append = TRUE) #gravando no arquivo
         
@@ -910,6 +926,13 @@ for(i in 1:Nsp){
   for(j in 1:length(sampleSizes)){
     for(current_vies_level in 1:vies_levels){
       tryCatch({
+
+        print(
+          paste(
+            '[', Sys.time(), '] Running scenario: species #', i, 
+            ', sample size ', sampleSizes[j], ', bias level ',  current_vies_level, sep=''
+          )
+        )
         
         ##logfile
         cat('STARTING SCENARIO: sp = ', i, '/ sampleSizes = ', sampleSizes[j], '/ current_vies_level = ', current_vies_level, ' / time: ', as.character(Sys.time()),  "\n \n", file = paste(projectFolder,'/logfileSDMnormalProjecoes.txt',sep=''), append = TRUE) #gravando no arquivo
@@ -983,7 +1006,14 @@ for(i in 1:Nsp){
   for(j in 1:length(sampleSizes)){
     for(current_vies_level in 1:vies_levels){
       tryCatch({
-        
+
+        print(
+          paste(
+            '[', Sys.time(), '] Running scenario: species #', i, 
+            ', sample size ', sampleSizes[j], ', bias level ',  current_vies_level, sep=''
+          )
+        )
+                
         ##logfile
         cat('STARTING SCENARIO: sp = ', i, '/ sampleSizes = ', sampleSizes[j], '/ current_vies_level = ', current_vies_level, ' / time: ', as.character(Sys.time()),  "\n \n", file = paste(projectFolder,'/logfileSDMimprovedDatasets.txt',sep=''), append = TRUE) #gravando no arquivo
                 
@@ -1067,6 +1097,13 @@ for(i in 1:Nsp){
   for(j in 1:length(sampleSizes)){
     for(current_vies_level in 1:vies_levels){
       tryCatch({
+  
+        print(
+          paste(
+            '[', Sys.time(), '] Running scenario: species #', i, 
+            ', sample size ', sampleSizes[j], ', bias level ',  current_vies_level, sep=''
+          )
+        )
         
         ##logfile
         cat('\nSTARTING SCENARIO: sp = ', i, '/ sampleSizes = ', sampleSizes[j], '/ current_vies_level = ', current_vies_level, ' / time: ', as.character(Sys.time()),  "\n \n", file=paste(projectFolder,'/logfileSDMimprovedBiomod2.txt',sep=''), append = TRUE) #gravando no arquivo
@@ -1421,7 +1458,7 @@ for(i in 1:Nsp){
 
 
 
-##PARTE 5: SELECIONANDO MELHOR MODELO-HCPA E IMPLEMENTANDO PROJECOES DOS SDMs-HCPA
+##PARTE 9: SELECIONANDO MELHOR MODELO-HCPA E IMPLEMENTANDO PROJECOES DOS SDMs-HCPA
 
 
 ##resetando o diretorio de trabalho atual do R
@@ -1443,7 +1480,7 @@ for(i in 1:Nsp){
         setwd(file.path(projectFolder,'SDMimproved'))
         
         ##preditoras
-        load( paste(projectFolder, '/SDMimproved/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMnormal/predictors.RData', sep='') )
+        load( paste(projectFolder, '/SDMimproved/sp', i, '.sample', sampleSizes[j], '.biaslevel',current_vies_level,'.SDMimproved/predictors.RData', sep='') )
         
         ##abrindo dados dos modelos
         statResultsSDMimproved = read.csv(paste(projectFolder,'/SDMimproved/StatisticalResults_SDMimproved.csv',sep=''), header = TRUE)

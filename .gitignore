@@ -36,3 +36,4 @@ datasets/
 biasLayers/
 SDMnormal/
 SDMimproved/
+logfile*

@@ -116,7 +116,7 @@ rangeByAC = function(envAreas, movRes, iter=100){
     spRange_i[c(occupiedCells, cellsBorder)] = c(rep(1,length(occupiedCells)), borderOcc) 
     
   }
-  
+
   #adjusting final gridfile
   spRange = spRange_i
   maskHelper = spSuit
